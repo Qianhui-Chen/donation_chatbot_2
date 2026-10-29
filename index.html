@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Fixed-script food bank fundraising conversation." />
+    <title>Food bank conversation</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body class="chat-page">
+    <main class="chat-app">
+      <header class="chat-header">
+        <div class="avatar" id="avatar" aria-hidden="true"></div>
+        <div class="chat-heading">
+          <h1 id="chat-title"></h1>
+          <p class="online">Online</p>
+        </div>
+      </header>
+      <section class="messages" id="messages" aria-live="polite" aria-label="Conversation messages"></section>
+      <form class="composer" id="composer">
+        <label for="message-input" hidden>Your response</label>
+        <textarea id="message-input" rows="1" placeholder="Please wait…" aria-label="Your response" disabled></textarea>
+        <button id="send-button" type="submit" disabled>Send</button>
+      </form>
+    </main>
+    <script src="assets/config.js"></script>
+    <script src="assets/app.js"></script>
+  </body>
+</html>
