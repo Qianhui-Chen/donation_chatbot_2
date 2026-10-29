@@ -77,7 +77,7 @@
       }
       window.clearInterval(timer);
       countdown.row.remove();
-      addMessage("system", "conversation ends, please go back to the quesionnaire", "end");
+      addMessage("system", `conversation ends, please go back to the quesionnaire\nChatbot code: ${script.code}`, "end");
     }, 1000);
   }
 
