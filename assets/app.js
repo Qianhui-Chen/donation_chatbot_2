@@ -12,6 +12,7 @@
   const avatar = document.querySelector("#avatar");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const typeDelay = reduceMotion ? 0 : 10;
+  const replyPause = 2000;
   let nextBotMessage = 0;
   let isWaiting = true;
   let hasEnded = false;
@@ -38,6 +39,17 @@
 
   function addMessage(kind, text, extraClass) {
     return createMessage(kind, text, extraClass).row;
+  }
+
+  function wait(milliseconds) {
+    return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+  }
+
+  function addTypingIndicator() {
+    const message = createMessage("bot", "");
+    message.row.setAttribute("aria-label", "Chatbot is typing");
+    message.bubble.innerHTML = '<span class="typing-dots" aria-hidden="true"><span></span><span></span><span></span></span>';
+    return message;
   }
 
   function setComposerEnabled(enabled) {
@@ -84,6 +96,11 @@
   async function showNextBotMessage() {
     isWaiting = true;
     setComposerEnabled(false);
+    if (nextBotMessage > 0) {
+      const typing = addTypingIndicator();
+      await wait(replyPause);
+      typing.row.remove();
+    }
     await typeBotMessage(script.messages[nextBotMessage]);
     nextBotMessage += 1;
     isWaiting = false;
