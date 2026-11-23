@@ -10,16 +10,19 @@
   const sendButton = document.querySelector("#send-button");
   const title = document.querySelector("#chat-title");
   const avatar = document.querySelector("#avatar");
+  const organizationHeader = document.querySelector("#organization-header");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const typeDelay = reduceMotion ? 0 : 10;
+  const wordDelay = reduceMotion ? 0 : 25;
   const replyPause = 2000;
   let nextBotMessage = 0;
   let isWaiting = true;
   let hasEnded = false;
+  let awaitingFinalResponse = false;
 
   title.textContent = script.title;
   avatar.textContent = script.avatar;
-  document.title = script.title + " — Food bank conversation";
+  organizationHeader.textContent = script.organizationHeader;
+  document.title = script.title + " — FoodForAll";
 
   function scrollToLatest() {
     requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; });
@@ -62,13 +65,14 @@
   async function typeBotMessage(text) {
     const message = createMessage("bot", "");
     message.bubble.classList.add("is-typing");
-    if (typeDelay === 0) {
+    if (wordDelay === 0) {
       message.bubble.textContent = text;
     } else {
-      for (let index = 0; index < text.length; index += 1) {
-        message.bubble.textContent += text[index];
-        if (index % 4 === 0) scrollToLatest();
-        await new Promise((resolve) => window.setTimeout(resolve, typeDelay));
+      const wordChunks = text.match(/\S+\s*/g) || [text];
+      for (const wordChunk of wordChunks) {
+        message.bubble.textContent += wordChunk;
+        scrollToLatest();
+        await wait(wordDelay);
       }
     }
     message.bubble.classList.remove("is-typing");
@@ -89,7 +93,7 @@
       }
       window.clearInterval(timer);
       countdown.row.remove();
-      addMessage("system", `conversation ends, please go back to the quesionnaire\nChatbot code: ${script.code}`, "end");
+      addMessage("system", `conversation ends, please please copy this code and paste it to the questionnaire Chatbot code: ${script.code}`, "end");
     }, 1000);
   }
 
@@ -105,10 +109,18 @@
     nextBotMessage += 1;
     isWaiting = false;
     if (nextBotMessage >= script.messages.length) {
-      startEndingSequence();
+      awaitingFinalResponse = true;
+      setComposerEnabled(true);
     } else {
       setComposerEnabled(true);
     }
+  }
+
+  function showInitialMessage() {
+    addMessage("bot", script.messages[0]);
+    nextBotMessage = 1;
+    isWaiting = false;
+    setComposerEnabled(true);
   }
 
   form.addEventListener("submit", (event) => {
@@ -116,10 +128,16 @@
     if (isWaiting || hasEnded) return;
     const message = input.value.trim();
     if (!message) { input.focus(); return; }
+    const isFinalResponse = awaitingFinalResponse;
+    awaitingFinalResponse = false;
     addMessage("user", message);
     input.value = "";
     input.style.height = "auto";
-    void showNextBotMessage();
+    if (isFinalResponse) {
+      startEndingSequence();
+    } else {
+      void showNextBotMessage();
+    }
   });
 
   input.addEventListener("keydown", (event) => {
@@ -134,5 +152,5 @@
     input.style.height = Math.min(input.scrollHeight, 130) + "px";
   });
 
-  void showNextBotMessage();
+  showInitialMessage();
 })();
