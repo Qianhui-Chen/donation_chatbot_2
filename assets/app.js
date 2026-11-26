@@ -17,7 +17,6 @@
   let nextBotMessage = 0;
   let isWaiting = true;
   let hasEnded = false;
-  let awaitingFinalResponse = false;
 
   title.textContent = script.title;
   avatar.textContent = script.avatar;
@@ -109,8 +108,7 @@
     nextBotMessage += 1;
     isWaiting = false;
     if (nextBotMessage >= script.messages.length) {
-      awaitingFinalResponse = true;
-      setComposerEnabled(true);
+      startEndingSequence();
     } else {
       setComposerEnabled(true);
     }
@@ -128,16 +126,10 @@
     if (isWaiting || hasEnded) return;
     const message = input.value.trim();
     if (!message) { input.focus(); return; }
-    const isFinalResponse = awaitingFinalResponse;
-    awaitingFinalResponse = false;
     addMessage("user", message);
     input.value = "";
     input.style.height = "auto";
-    if (isFinalResponse) {
-      startEndingSequence();
-    } else {
-      void showNextBotMessage();
-    }
+    void showNextBotMessage();
   });
 
   input.addEventListener("keydown", (event) => {
